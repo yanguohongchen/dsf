@@ -3,7 +3,9 @@ package com.zkdsf.core;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
@@ -12,17 +14,19 @@ import org.apache.zookeeper.WatchedEvent;
  * 服务订阅者
  * 
  * @author sea
- *
+ * 
  */
 public class Subscriber extends Person
 {
 
 	private List<ServeiceInstanceInfo> serveiceInstanceInfos;
 
+	private Map<String, ServeiceInstanceInfo> map;
+
 	public Subscriber(String serviceName, String serverName, String owner, ZkClient zkClient) throws IOException
 	{
 		super(zkClient);
-		serviceName = "";
+		this.serviceName = serviceName;
 		subscribeService(serverName, owner);
 		watch();
 	}
@@ -53,8 +57,8 @@ public class Subscriber extends Person
 		}
 	}
 
-	//根据得到得服务列表创建连接池
-	//获取一个客户端链接
+	// 根据得到得服务列表创建连接池
+	// 获取一个客户端链接
 	public void getClient()
 	{
 
@@ -66,7 +70,7 @@ public class Subscriber extends Person
 		// 处理监听
 		try
 		{
-			serveiceInstanceInfos = zkClient.queryServiceInstanceInfos(serviceName, new ZkWatch());
+			map = zkClient.queryServiceInstanceInfos(serviceName, new ZkWatch());
 		} catch (KeeperException e)
 		{
 			// TODO Auto-generated catch block
@@ -82,7 +86,7 @@ public class Subscriber extends Person
 	{
 		try
 		{
-			serveiceInstanceInfos = zkClient.queryServiceInstanceInfos(serviceName, new ZkWatch());
+			map = zkClient.queryServiceInstanceInfos(serviceName, new ZkWatch());
 		} catch (KeeperException e)
 		{
 			// TODO Auto-generated catch block
@@ -94,15 +98,26 @@ public class Subscriber extends Person
 		}
 	}
 
-	public List<ServeiceInstanceInfo> getServeiceInstanceInfos()
+	public void dealService() throws KeeperException, InterruptedException
 	{
-		return serveiceInstanceInfos;
+		Map<String, ServeiceInstanceInfo> newmap = zkClient.queryServiceInstanceInfos(serviceName, new ZkWatch());
+		for (String newkey : newmap.keySet())
+		{
+			if (!map.containsKey(newkey))//新增的服务端
+			{
+				
+			}
+		}
+		for (String newkey : map.keySet())
+		{
+			if (!newmap.containsKey(newkey))//已下线的服务端
+			{
+				
+			}
+		}
+		//更新在线服务列表
+		map = newmap;
+		
 	}
-
-	public void setServeiceInstanceInfos(List<ServeiceInstanceInfo> serveiceInstanceInfos)
-	{
-		this.serveiceInstanceInfos = serveiceInstanceInfos;
-	}
-
 
 }

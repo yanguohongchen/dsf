@@ -2,7 +2,9 @@ package com.zkdsf.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -118,15 +120,15 @@ public class ZkClient
 	 * @throws KeeperException
 	 * @throws InterruptedException
 	 */
-	public List<ServeiceInstanceInfo> queryServiceInstanceInfos(String serviceName, Watcher watcher) throws KeeperException, InterruptedException
+	public Map<String,ServeiceInstanceInfo> queryServiceInstanceInfos(String serviceName, Watcher watcher) throws KeeperException, InterruptedException
 	{
 		List<RegisterMsg> registerMsgs = queryRegisterMsgs(serviceName, watcher);
-		List<ServeiceInstanceInfo> serveiceInstanceInfos = new ArrayList<ServeiceInstanceInfo>();
+		Map<String,ServeiceInstanceInfo> map = new HashMap<String,ServeiceInstanceInfo>();
 		for (RegisterMsg registerMsg : registerMsgs)
 		{
-			serveiceInstanceInfos.add(registerMsg.getServeiceInstanceInfo());
+			map.put(registerMsg.getServeiceInstanceInfo().toString(),registerMsg.getServeiceInstanceInfo());
 		}
-		return serveiceInstanceInfos;
+		return map;
 	}
 
 	/**
