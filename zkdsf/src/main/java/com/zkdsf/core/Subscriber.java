@@ -3,7 +3,6 @@ package com.zkdsf.core;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,14 +18,16 @@ import org.apache.zookeeper.WatchedEvent;
 public class Subscriber extends Person
 {
 
-	private List<ServeiceInstanceInfo> serveiceInstanceInfos;
 
+	private ServiceDefineInfo serviceDefineInfo;
+	
 	private Map<String, ServeiceInstanceInfo> map;
 
-	public Subscriber(String serviceName, String serverName, String owner, ZkClient zkClient) throws IOException
+	public Subscriber(ServiceDefineInfo serviceDefineInfo, String serverName, String owner, ZkClient zkClient) throws IOException
 	{
 		super(zkClient);
-		this.serviceName = serviceName;
+		this.serviceDefineInfo = serviceDefineInfo;
+		this.serviceName = serviceDefineInfo.getServicename();
 		subscribeService(serverName, owner);
 		watch();
 	}
@@ -61,7 +62,7 @@ public class Subscriber extends Person
 	// 获取一个客户端链接
 	public void getClient()
 	{
-
+		
 	}
 
 	@Override
@@ -70,12 +71,8 @@ public class Subscriber extends Person
 		// 处理监听
 		try
 		{
-			map = zkClient.queryServiceInstanceInfos(serviceName, new ZkWatch());
-		} catch (KeeperException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e)
+			dealService();
+		} catch (KeeperException | InterruptedException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -86,12 +83,8 @@ public class Subscriber extends Person
 	{
 		try
 		{
-			map = zkClient.queryServiceInstanceInfos(serviceName, new ZkWatch());
-		} catch (KeeperException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e)
+			dealService();
+		} catch (KeeperException | InterruptedException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -117,7 +110,6 @@ public class Subscriber extends Person
 		}
 		//更新在线服务列表
 		map = newmap;
-		
 	}
 
 }

@@ -1,0 +1,114 @@
+@namespace("com.baidu.usercenter.api")
+protocol UserService
+{   
+    record UserInfo
+    {
+    	long userId;
+    	string username;
+    	string email;
+    	long mobile;
+    	long depid;
+    }
+    
+    error UsernameException{}
+    error PasswordException{}
+    error UsernameExistsException{}
+    error OldPasswordException{}
+
+	/**
+	 * 登录
+	 * @param username				username
+	 * @param password				password
+	 * @return						
+	 */
+	long login(string username, string password) throws UsernameException, PasswordException;
+	
+	/**
+	 * 注册
+	 * @param username				username
+	 * @param password				password
+	 * @param email					email
+	 * @param mobile				mobile
+	 * @return						
+	 */
+	long createUser(string username, string password, string email, long mobile,long depid) throws UsernameExistsException;
+	
+	/**
+	 * 修改密码
+	 * @param userId				
+	 * @param oldpwd				
+	 * @param newpwd											
+	 */
+	void changePassword(long userId, string oldpwd, string newpwd) throws OldPasswordException;
+
+	/**
+	 * 忘记密码
+	 * @param username				
+	 * @param password				
+	 * @param checkcode											
+	 */	
+	void forgetPassword(string username, string password);
+	
+	/**
+	 * 修改用户信息
+	 * @param userId				
+	 * @param email				
+	 * @param mobile											
+	 */	
+	void updateUserInfo(long userId, string email, long  mobile,long depid);
+	
+	/**
+	 * 读取用户信息
+	 * @param userId															
+	 */	
+	union{null, UserInfo} getUserById(long userId);
+	
+	/**
+	 * 读取用户信息
+	 * @param username															
+	 */	
+	union{null, UserInfo} getUserByUsername(string username);
+	
+	/**
+	*读取用户列表
+	*@param 
+	*/
+	array<UserInfo> getUserList();
+	
+	
+	
+	/************************************会话模块********************************************/
+	record Session
+	{
+		string sid;
+		string encryptKey;
+    }
+	
+	/**
+	 * 创建会话
+	 * @param userId
+	 * @return	sid
+	 */
+	Session createSession(long userId);
+	
+	/**
+	 * 删除会话
+	 * @param sid							sid
+	 * @return								
+	 */
+	void removeSession(string sid);
+	
+	/**
+	 * 获取会话私钥
+	 * @param sid							sid
+	 * @return								
+	 */
+	union{string, null} getEncryptKey(string sid);
+
+	/**
+	 * 获取会话用户ID
+	 * @param sid							sid
+	 * @return								不存在返回0
+	 */	
+	long getUserId(string sid);
+}
