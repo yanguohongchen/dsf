@@ -63,8 +63,12 @@ public class ZkClient
 	{
 		ServiceDefineInfo serviceDefineInfo = publishMsg.getServiceDefineInfo();
 		String serviceName = "/" + serviceDefineInfo.getServicename();
+		String server = serviceName +"/server";
+		String client = serviceName +"/client";
 		zk.create(serviceName, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-		zk.setData(serviceName, gson.toJson(publishMsg).getBytes(), 1);
+		zk.setData(serviceName, gson.toJson(publishMsg).getBytes(), 0);
+		zk.create(server, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+		zk.create(client, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 	}
 
 	/**
@@ -79,7 +83,7 @@ public class ZkClient
 	{
 		ServeiceInstanceInfo serveiceInstanceInfo = registerMsg.getServeiceInstanceInfo();
 		String serverName = "/" + serveiceInstanceInfo.getServiceName() + "/server/" + serveiceInstanceInfo.toString();
-		zk.create(serverName, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+		zk.create(serverName, null, Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
 		zk.setData(serverName, gson.toJson(registerMsg).getBytes(), 1);
 	}
 
@@ -91,7 +95,7 @@ public class ZkClient
 	{
 		SubscriberInfo subscriberInfo = subscriberMsg.getSubscribeInfo();
 		String clientName = "/" + subscriberMsg.getServiceName() + "/client/" + subscriberInfo.getServerName();
-		zk.create(clientName, null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+		zk.create(clientName, null, Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
 		zk.setData(clientName, gson.toJson(subscriberMsg).getBytes(), 1);
 
 	}
@@ -170,6 +174,7 @@ public class ZkClient
 	 */
 	public ServiceDefineInfo queryServiceDefineInfo(String serviceName,Watcher watcher) throws KeeperException, InterruptedException{
 		Stat stat = new Stat();
+		serviceName = "/"+serviceName;
 		byte[] data = zk.getData(serviceName, watcher, stat);
 		ServiceDefineInfo serviceDefineInfo = gson.fromJson(new String(data), ServiceDefineInfo.class);
 		return serviceDefineInfo;

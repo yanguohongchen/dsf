@@ -97,14 +97,14 @@ public class Subscriber extends Person
 		{
 			if (!map.containsKey(newkey))//新增的服务端
 			{
-				
+				System.out.println("新增的服务："+newkey);
 			}
 		}
 		for (String newkey : map.keySet())
 		{
 			if (!newmap.containsKey(newkey))//已下线的服务端
 			{
-				
+				System.out.println("已经下线的服务端："+newkey);
 			}
 		}
 		//更新在线服务列表

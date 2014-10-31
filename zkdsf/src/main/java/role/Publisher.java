@@ -20,7 +20,8 @@ public class Publisher extends Person
 
 	public Publisher(String serviceName,ZkClient zkClient) throws IOException, KeeperException, InterruptedException
 	{
-		super(serviceName,zkClient);
+		super(serviceName);
+		this.zkClient = zkClient;
 	}
 
 	// 定义服务
@@ -46,6 +47,7 @@ public class Publisher extends Person
 	{
 
 	}
+	
 
 
 }

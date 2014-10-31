@@ -3,9 +3,14 @@ package msg;
 public class RegisterInfo
 {
 
+	public RegisterInfo(String owner)
+	{
+		this.owner = owner;
+	}
+
 	private String owner;
-	
-	private long datetime;
+
+	private long datetime = System.currentTimeMillis();
 
 	public String getOwner()
 	{
@@ -26,7 +31,5 @@ public class RegisterInfo
 	{
 		this.datetime = datetime;
 	}
-	
-	
-	
+
 }

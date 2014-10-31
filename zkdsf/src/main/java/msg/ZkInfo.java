@@ -3,6 +3,9 @@ package msg;
 public class ZkInfo
 {
 
+	
+	private String serviceName;
+	
 	private String connectAddr;
 
 	private int timeout;
@@ -27,4 +30,17 @@ public class ZkInfo
 		this.timeout = timeout;
 	}
 
+	public String getServiceName()
+	{
+		return serviceName;
+	}
+
+	public void setServiceName(String serviceName)
+	{
+		this.serviceName = serviceName;
+	}
+
+	
+	
+	
 }

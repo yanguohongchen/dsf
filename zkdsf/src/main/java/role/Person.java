@@ -20,6 +20,10 @@ public abstract class Person
 	protected ServiceDefineInfo serviceDefineInfo;
 	
 
+	public Person(String serviceName){
+		this.serviceName = serviceName;
+	}
+	
 	public Person(String serviceName,ZkClient zkClient) throws IOException, KeeperException, InterruptedException
 	{
 		this.zkClient = zkClient;

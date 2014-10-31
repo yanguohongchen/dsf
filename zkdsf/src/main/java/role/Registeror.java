@@ -39,7 +39,7 @@ public class Registeror extends Person
 	@Override
 	public void deal(WatchedEvent event)
 	{
-		
+		//暂时不需要信息
 	}
 
 }
