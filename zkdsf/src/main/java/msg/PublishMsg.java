@@ -1,10 +1,19 @@
-package com.zkdsf.core;
+package msg;
 
 public class PublishMsg
 {
+
 	private PublisherInfo publisherInfo;
-	
+
 	private ServiceDefineInfo serviceDefineInfo;
+
+	public PublishMsg(String owner, ServiceDefineInfo serviceDefineInfo)
+	{
+		publisherInfo = new PublisherInfo();
+		publisherInfo.setOwner(owner);
+		publisherInfo.setDatetime(System.currentTimeMillis());
+		this.serviceDefineInfo = serviceDefineInfo;
+	}
 
 	public PublisherInfo getPublisherInfo()
 	{
@@ -25,6 +34,5 @@ public class PublishMsg
 	{
 		this.serviceDefineInfo = serviceDefineInfo;
 	}
-	
-	
+
 }

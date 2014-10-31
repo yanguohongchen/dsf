@@ -1,4 +1,4 @@
-package com.zkdsf.clientpool;
+package client;
 
 import org.apache.avro.ipc.NettyTransceiver;
 

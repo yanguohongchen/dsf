@@ -1,16 +1,20 @@
-package com.zkdsf.core;
+package role;
 
 import java.io.IOException;
+
+import msg.RegisterMsg;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 
+import com.zkdsf.core.ZkClient;
+
 public class Registeror extends Person
 {
 
-	public Registeror(ZkClient zkClient) throws IOException
+	public Registeror(String serviceName,ZkClient zkClient) throws IOException, KeeperException, InterruptedException
 	{
-		super(zkClient);
+		super(serviceName,zkClient);
 	}
 
 	// 注册服务

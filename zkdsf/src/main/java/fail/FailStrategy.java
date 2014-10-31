@@ -2,8 +2,8 @@ package fail;
 
 import java.util.List;
 
-import com.zkdsf.core.ServeiceInstanceInfo;
-import com.zkdsf.core.ServiceDefineInfo;
+import msg.ServeiceInstanceInfo;
+import msg.ServiceDefineInfo;
 
 public interface FailStrategy
 {

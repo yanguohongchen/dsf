@@ -1,10 +1,10 @@
-package com.zkdsf.core;
+package msg;
 
 public class ZkInfo
 {
 
 	private String connectAddr;
-	
+
 	private int timeout;
 
 	public String getConnectAddr()
@@ -26,8 +26,5 @@ public class ZkInfo
 	{
 		this.timeout = timeout;
 	}
-	
-	
-	
-	
+
 }

@@ -1,4 +1,4 @@
-package com.zkdsf.core;
+package msg;
 
 import java.util.Map;
 
@@ -14,6 +14,8 @@ public class ServiceDefineInfo
 	private String servicename;
 
 	private String description;
+	
+	private String proxyClass;
 
 	private String protol;
 
@@ -106,5 +108,17 @@ public class ServiceDefineInfo
 	{
 		this.otherAttrs = otherAttrs;
 	}
+
+	public String getProxyClass()
+	{
+		return proxyClass;
+	}
+
+	public void setProxyClass(String proxyClass)
+	{
+		this.proxyClass = proxyClass;
+	}
+	
+	
 
 }

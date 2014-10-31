@@ -2,6 +2,8 @@ package com.zkdsf.core;
 
 import java.io.IOException;
 
+import msg.ZkInfo;
+
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 

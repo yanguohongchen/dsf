@@ -3,7 +3,7 @@ package route;
 import java.util.List;
 import java.util.Random;
 
-import com.zkdsf.core.ServeiceInstanceInfo;
+import msg.ServeiceInstanceInfo;
 
 /**
  * 随机保持策略，在有效的服务中随机选择一个

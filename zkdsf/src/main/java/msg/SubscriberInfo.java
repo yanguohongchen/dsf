@@ -1,4 +1,4 @@
-package com.zkdsf.core;
+package msg;
 
 public class SubscriberInfo {
 

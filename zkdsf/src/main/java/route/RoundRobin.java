@@ -2,7 +2,7 @@ package route;
 
 import java.util.List;
 
-import com.zkdsf.core.ServeiceInstanceInfo;
+import msg.ServeiceInstanceInfo;
 
 /**
  * 轮询的路由策略，所有在线服务实例拥有相同的权重

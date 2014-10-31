@@ -2,7 +2,7 @@ package route;
 
 import java.util.List;
 
-import com.zkdsf.core.ServeiceInstanceInfo;
+import msg.ServeiceInstanceInfo;
 
 /**
  * 路由策略

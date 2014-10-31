@@ -1,4 +1,4 @@
-package com.zkdsf.clientpool;
+package client;
 
 /**
  * Avro连接池

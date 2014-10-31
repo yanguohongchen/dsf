@@ -1,9 +1,13 @@
-package com.zkdsf.core;
+package role;
 
 import java.io.IOException;
 
+import msg.PublishMsg;
+
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
+
+import com.zkdsf.core.ZkClient;
 
 /**
  * 服务发布者
@@ -14,9 +18,9 @@ import org.apache.zookeeper.WatchedEvent;
 public class Publisher extends Person
 {
 
-	public Publisher(ZkClient zkClient) throws IOException
+	public Publisher(String serviceName,ZkClient zkClient) throws IOException, KeeperException, InterruptedException
 	{
-		super(zkClient);
+		super(serviceName,zkClient);
 	}
 
 	// 定义服务

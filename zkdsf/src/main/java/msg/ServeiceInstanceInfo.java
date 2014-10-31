@@ -1,4 +1,4 @@
-package com.zkdsf.core;
+package msg;
 
 /**
  * 服务实例信息

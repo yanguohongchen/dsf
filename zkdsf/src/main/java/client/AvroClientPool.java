@@ -1,4 +1,4 @@
-package com.zkdsf.clientpool;
+package client;
 
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.GenericObjectPool;

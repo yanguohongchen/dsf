@@ -6,6 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import msg.PublishMsg;
+import msg.RegisterMsg;
+import msg.ServeiceInstanceInfo;
+import msg.ServiceDefineInfo;
+import msg.SubscriberInfo;
+import msg.SubscriberMsg;
+
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.Watcher;
@@ -151,6 +158,21 @@ public class ZkClient
 			subscriberMsgs.add(gson.fromJson(new String(zk.getData(childpath, false, stat)), SubscriberMsg.class));
 		}
 		return subscriberMsgs;
+	}
+	
+	/**
+	 * 获取查询服务
+	 * @param serviceName
+	 * @param watcher
+	 * @return
+	 * @throws KeeperException
+	 * @throws InterruptedException
+	 */
+	public ServiceDefineInfo queryServiceDefineInfo(String serviceName,Watcher watcher) throws KeeperException, InterruptedException{
+		Stat stat = new Stat();
+		byte[] data = zk.getData(serviceName, watcher, stat);
+		ServiceDefineInfo serviceDefineInfo = gson.fromJson(new String(data), ServiceDefineInfo.class);
+		return serviceDefineInfo;
 	}
 
 }

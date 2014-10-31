@@ -3,7 +3,7 @@ package route;
 import java.util.List;
 import java.util.Random;
 
-import com.zkdsf.core.ServeiceInstanceInfo;
+import msg.ServeiceInstanceInfo;
 
 /**
  * 带权重轮询的路由策略

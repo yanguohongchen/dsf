@@ -3,6 +3,8 @@ package com.zkdsf.core;
 import java.util.List;
 import java.util.Map;
 
+import msg.ServeiceInstanceInfo;
+
 public class LocalServiceManager
 {
 	

@@ -1,13 +1,18 @@
-package com.zkdsf.core;
+package role;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.List;
 import java.util.Map;
+
+import msg.ServeiceInstanceInfo;
+import msg.SubscriberInfo;
+import msg.SubscriberMsg;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
+
+import com.zkdsf.core.ZkClient;
 
 /**
  * 服务订阅者
@@ -17,17 +22,11 @@ import org.apache.zookeeper.WatchedEvent;
  */
 public class Subscriber extends Person
 {
-
-
-	private ServiceDefineInfo serviceDefineInfo;
-	
+	//此信息由订阅者特有信息
 	private Map<String, ServeiceInstanceInfo> map;
-
-	public Subscriber(ServiceDefineInfo serviceDefineInfo, String serverName, String owner, ZkClient zkClient) throws IOException
+	public Subscriber(String serviceName, String serverName, String owner, ZkClient zkClient) throws IOException, KeeperException, InterruptedException
 	{
-		super(zkClient);
-		this.serviceDefineInfo = serviceDefineInfo;
-		this.serviceName = serviceDefineInfo.getServicename();
+		super(serviceName,zkClient);
 		subscribeService(serverName, owner);
 		watch();
 	}
@@ -57,9 +56,9 @@ public class Subscriber extends Person
 			e.printStackTrace();
 		}
 	}
-
-	// 根据得到得服务列表创建连接池
-	// 获取一个客户端链接
+	
+	//根据路由策略获取服务实例，并从连接池中获取一个连接
+	//如果获取连接失败，根据失败策略作出处理
 	public void getClient()
 	{
 		
