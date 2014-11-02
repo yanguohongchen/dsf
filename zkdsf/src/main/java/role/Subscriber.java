@@ -3,14 +3,26 @@ package role;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import msg.ServeiceInstanceInfo;
 import msg.SubscriberInfo;
 import msg.SubscriberMsg;
 
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher.Event.EventType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import client.AvroClientFactory;
+import client.AvroClientPool;
 
 import com.zkdsf.core.ZkClient;
 
@@ -18,22 +30,30 @@ import com.zkdsf.core.ZkClient;
  * 服务订阅者
  * 
  * @author sea
+ * @param <E>
  * 
  */
 public class Subscriber extends Person
 {
-	//此信息由订阅者特有信息
-	private Map<String, ServeiceInstanceInfo> map;
-	public Subscriber(String serviceName, String serverName, String owner, ZkClient zkClient) throws IOException, KeeperException, InterruptedException
+
+	private static final Logger logger = LoggerFactory.getLogger(Subscriber.class);
+
+	// 此信息由订阅者特有信息
+	private LinkedHashMap<String, ServeiceInstanceInfo> map = new LinkedHashMap<>();
+
+	private Map<String, AvroClientPool<Object>> clientPoolMap = new HashMap<>();
+
+	private GenericObjectPoolConfig cfg;
+
+	public Subscriber(String serviceName, ZkClient zkClient) throws IOException, KeeperException, InterruptedException
 	{
-		super(serviceName,zkClient);
-		subscribeService(serverName, owner);
-		watch();
+		super(serviceName, zkClient);
 	}
 
 	// 订阅服务
-	public void subscribeService(String serverName, String owner) throws UnknownHostException
+	public void subscribeService(String serverName, String owner, GenericObjectPoolConfig cfg) throws UnknownHostException, KeeperException, InterruptedException
 	{
+		this.cfg = cfg;
 		SubscriberMsg subscriberMsg = new SubscriberMsg();
 		subscriberMsg.setServiceName(serviceName);
 		SubscriberInfo subscriberInfo = new SubscriberInfo();
@@ -43,72 +63,133 @@ public class Subscriber extends Person
 		subscriberInfo.setDatetime(System.currentTimeMillis());
 		subscriberInfo.setOwner(owner);
 		subscriberInfo.setServerName(serverName);
+		subscriberMsg.setSubscribeInfo(subscriberInfo);
 		try
 		{
 			zkClient.subscriberService(subscriberMsg);
-		} catch (KeeperException e)
+		} catch (Exception e)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("订阅" + serviceName + "服务失败!", e);
+			throw e;
 		}
+		watch();
 	}
-	
-	//根据路由策略获取服务实例，并从连接池中获取一个连接
-	//如果获取连接失败，根据失败策略作出处理
-	public void getClient()
+
+	// 根据路由策略获取服务实例，并从连接池中获取一个连接
+	// 如果获取连接失败，根据失败策略作出处理
+	public Object choseClient()
 	{
-		
+		List<ServeiceInstanceInfo> instances = new ArrayList<ServeiceInstanceInfo>();
+		Set<String> set = map.keySet();
+		for (String string : set)
+		{
+			instances.add(map.get(string));
+		}
+		// 路由策略
+		ServeiceInstanceInfo serveiceInstanceInfo = routeStrategy.getInstance(instances);
+		AvroClientPool<Object> avroClientPool = clientPoolMap.get(serveiceInstanceInfo.toString());
+
+		try
+		{
+			Object o = avroClientPool.borrowObject();
+			return o;
+		} catch (Exception e)
+		{
+			// 失败策略
+			ServeiceInstanceInfo newServeiceInstanceInfo = failStrategy.failover(serviceDefineInfo, serveiceInstanceInfo, instances, e);
+			avroClientPool = clientPoolMap.get(newServeiceInstanceInfo.toString());
+			try
+			{
+				Object o = avroClientPool.borrowObject();
+				return o;
+			} catch (Exception e1)
+			{
+				throw new RuntimeException("调用服务" + serviceDefineInfo.getServicename() + "失败", e);
+			}
+
+		}
 	}
 
 	@Override
-	public void deal(WatchedEvent event)
+	protected void deal(WatchedEvent event)
 	{
-		// 处理监听
-		try
+		if (event.getType() == EventType.NodeChildrenChanged)
 		{
+			try
+			{
+				zkClient.addWatcherRegisterMsgs(serviceName, watcher);
+			} catch (KeeperException e)
+			{
+				logger.error(serviceName + " not exist!", e);
+			} catch (InterruptedException e)
+			{
+				logger.error("zk事务异常", e);
+			}
+		} else
+		{
+			// 处理监听
 			dealService();
-		} catch (KeeperException | InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 
-	public void watch()
+	private void watch()
+	{
+		dealService();
+	}
+
+	private void dealService()
 	{
 		try
 		{
-			dealService();
-		} catch (KeeperException | InterruptedException e)
+			LinkedHashMap<String, ServeiceInstanceInfo> newmap = zkClient.queryServiceInstanceInfos(serviceName, watcher);
+			for (String newkey : newmap.keySet())
+			{
+				if (!map.containsKey(newkey))// 新增的服务端
+				{
+					logger.debug("新增的实例：" + newkey);
+					createClientPool(newmap.get(newkey));
+				}
+			}
+			for (String newkey : map.keySet())
+			{
+				if (!newmap.containsKey(newkey))// 已下线的服务端
+				{
+					logger.debug("下线的实例：" + newkey);
+					destoryClientPool(newkey);
+				}
+			}
+			// 更新本地服务列表
+			map = newmap;
+		} catch (KeeperException e)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(serviceName + " not exist!", e);
+		} catch (InterruptedException e)
+		{
+			logger.error("zk事务异常", e);
+		}
+
+	}
+
+	private void createClientPool(ServeiceInstanceInfo serveiceInstanceInfo)
+	{
+		try
+		{
+			@SuppressWarnings("unchecked")
+			Class<Object> target = (Class<Object>) Class.forName(serviceDefineInfo.getProxyClass());
+			AvroClientFactory<Object> avroClientFactory = new AvroClientFactory<Object>(target, serveiceInstanceInfo.getIp(), serveiceInstanceInfo.getPort());
+			AvroClientPool<Object> avroClientPool = new AvroClientPool<Object>(serveiceInstanceInfo.toString(), avroClientFactory, cfg);
+			clientPoolMap.put(serveiceInstanceInfo.toString(), avroClientPool);
+		} catch (Exception e)
+		{
+			logger.error("创建服务实例连接池失败：" + serveiceInstanceInfo.toString(), e);
 		}
 	}
 
-	public void dealService() throws KeeperException, InterruptedException
+	private void destoryClientPool(String key)
 	{
-		Map<String, ServeiceInstanceInfo> newmap = zkClient.queryServiceInstanceInfos(serviceName, new ZkWatch());
-		for (String newkey : newmap.keySet())
-		{
-			if (!map.containsKey(newkey))//新增的服务端
-			{
-				System.out.println("新增的服务："+newkey);
-			}
-		}
-		for (String newkey : map.keySet())
-		{
-			if (!newmap.containsKey(newkey))//已下线的服务端
-			{
-				System.out.println("已经下线的服务端："+newkey);
-			}
-		}
-		//更新在线服务列表
-		map = newmap;
+		AvroClientPool<Object> avroClientPool = clientPoolMap.get(key);
+		avroClientPool.destory();
+		clientPoolMap.remove(key);
 	}
 
 }

@@ -11,13 +11,13 @@ public interface ClientPool<E>
 	 * 申请对象
 	 * @return
 	 */
-	public AvroClient<E> openClient();
+	public E openClient();
 	
 	/**
 	 * 归还对象
 	 * @param client
 	 */
-	public void returnClient(AvroClient<E> client);
+	public void returnClient(E client);
 	
 	/**
 	 * 清空连接池

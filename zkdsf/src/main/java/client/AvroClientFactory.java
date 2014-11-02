@@ -10,18 +10,20 @@ import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * avro rpc 客户端工厂
+ * 
  * @author sea
  */
-public final class AvroClientFactory<E> extends BasePooledObjectFactory<AvroClient<E>>
+public final class AvroClientFactory<E> extends BasePooledObjectFactory<E>
 {
 	private static final Logger logger = LoggerFactory.getLogger(AvroClientFactory.class);
 
 	private String hostname;
 	private int port;
 	private Class<E> clazz;
+
+	private NettyTransceiver client;
 
 	public AvroClientFactory(Class<E> clazz, String hostname, int port)
 	{
@@ -31,43 +33,33 @@ public final class AvroClientFactory<E> extends BasePooledObjectFactory<AvroClie
 	}
 
 	@Override
-	public AvroClient<E> create() throws Exception
+	public E create() throws Exception
 	{
 		try
 		{
-			NettyTransceiver client = new NettyTransceiver(new InetSocketAddress(hostname, port));
+			client = new NettyTransceiver(new InetSocketAddress(hostname, port));
 			E proxy = SpecificRequestor.getClient(clazz, client);
 
-			AvroClient<E> ac = new AvroClient<>();
-			ac.transceiver = client;
-			ac.proxy = proxy;
-
-			logger.debug(clazz.getSimpleName() + "客户端连接池创建实例" + ac);
-			return ac;
-		}
-		catch (Exception e)
+			logger.debug(clazz.getSimpleName() + "客户端连接池创建实例" + proxy);
+			return proxy;
+		} catch (Exception e)
 		{
 			logger.error(clazz.getSimpleName() + "客户端连接池创建客户端错误:" + e.getMessage(), e);
 			throw e;
 		}
 	}
 
-	@Override
-	public boolean validateObject(PooledObject<AvroClient<E>> p)
-	{
-		return true;
-	}
 
 	@Override
-	public void destroyObject(PooledObject<AvroClient<E>> p) throws Exception
+	public void destroyObject(PooledObject<E> p) throws Exception
 	{
-		p.getObject().transceiver.close();
+		client.close();
 		logger.debug(clazz.getSimpleName() + "客户端连接池销毁实例" + p.getObject());
 	}
 
 	@Override
-	public PooledObject<AvroClient<E>> wrap(AvroClient<E> obj)
+	public PooledObject<E> wrap(E obj)
 	{
-		return new DefaultPooledObject<AvroClient<E>>(obj);
+		return new DefaultPooledObject<E>(obj);
 	}
 }

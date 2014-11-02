@@ -6,6 +6,8 @@ import msg.PublishMsg;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.zkdsf.core.ZkClient;
 
@@ -18,7 +20,9 @@ import com.zkdsf.core.ZkClient;
 public class Publisher extends Person
 {
 
-	public Publisher(String serviceName,ZkClient zkClient) throws IOException, KeeperException, InterruptedException
+	private static final Logger logger = LoggerFactory.getLogger(Publisher.class);
+
+	public Publisher(String serviceName, ZkClient zkClient) throws IOException, KeeperException, InterruptedException
 	{
 		super(serviceName);
 		this.zkClient = zkClient;
@@ -30,24 +34,19 @@ public class Publisher extends Person
 		try
 		{
 			zkClient.publishServiceDefine(publishMsg);
-		} catch (KeeperException e)
+			logger.debug("发布服务" + publishMsg.getServiceDefineInfo().getServicename() + "成功！");
+
+		} catch (Exception e)
 		{
 			e.printStackTrace();
-		} catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}catch(IllegalArgumentException e){
-			e.printStackTrace();
+			logger.error("发布服务" + publishMsg.getServiceDefineInfo().getServicename() + "失败！", e);
 		}
 	}
-	
 
 	@Override
 	public void deal(WatchedEvent event)
 	{
 
 	}
-	
-
 
 }

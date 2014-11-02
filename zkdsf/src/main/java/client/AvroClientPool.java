@@ -11,12 +11,12 @@ import org.slf4j.LoggerFactory;
  * @author sea
  * @param <E> avro client
  */
-public class AvroClientPool<E> extends GenericObjectPool<AvroClient<E>> implements ClientPool<E>
+public class AvroClientPool<E> extends GenericObjectPool<E> implements ClientPool<E>
 {
 	private static final Logger logger = LoggerFactory.getLogger(AvroClientPool.class);
 	private String name;
 
-	public AvroClientPool(String name, PooledObjectFactory<AvroClient<E>> factory, GenericObjectPoolConfig cfg)
+	public AvroClientPool(String name, PooledObjectFactory<E> factory, GenericObjectPoolConfig cfg)
 	{
 		super(factory, cfg);
 		this.name = name;
@@ -24,7 +24,7 @@ public class AvroClientPool<E> extends GenericObjectPool<AvroClient<E>> implemen
 	}
 
 	@Override
-	public AvroClient<E> openClient()
+	public E openClient()
 	{
 		try
 		{
@@ -38,7 +38,7 @@ public class AvroClientPool<E> extends GenericObjectPool<AvroClient<E>> implemen
 	}
 
 	@Override
-	public void returnClient(AvroClient<E> client)
+	public void returnClient (E client)
 	{
 		this.returnObject(client);	
 	}
