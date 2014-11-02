@@ -1,4 +1,4 @@
-package com.zkdsf.core;
+package core;
 
 public class ZkDsf {
 

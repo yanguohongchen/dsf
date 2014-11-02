@@ -9,7 +9,7 @@ import org.apache.zookeeper.WatchedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.zkdsf.core.ZkClient;
+import core.ZkClient;
 
 public class Registeror extends Person
 {

@@ -1,4 +1,4 @@
-package com.zkdsf.core;
+package core;
 
 import java.io.IOException;
 import java.util.ArrayList;

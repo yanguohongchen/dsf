@@ -23,8 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import client.AvroClientFactory;
 import client.AvroClientPool;
-
-import com.zkdsf.core.ZkClient;
+import core.ZkClient;
 
 /**
  * 服务订阅者
