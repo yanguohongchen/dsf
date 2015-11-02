@@ -21,7 +21,7 @@ public class Dsframe
 	public void start(ZkInfo zkInfo) throws Exception
 	{
 		ZkClient zkClient = new ZkClient(zkInfo.getConnectAddr(), zkInfo.getTimeout(), new ZkWatch());
-//		createService( zkInfo,  zkClient);
+		createService( zkInfo,  zkClient);
 		  registerServer(zkInfo, zkClient);
 //		  subscriber(zkClient);
 		

@@ -36,7 +36,7 @@ public class SubDsframe
 			Subscriber subscriber = new Subscriber("test" ,zkClient);
 			GenericObjectPoolConfig genericObjectPoolConfig = new GenericObjectPoolConfig();
 			subscriber.subscribeService("testapp", "zhanghai", genericObjectPoolConfig);
-			Object o = subscriber.choseClient();
+//			Object o = subscriber.choseClient();
 			
 			Thread.sleep(1000*60*60);
 			
