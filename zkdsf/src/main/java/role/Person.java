@@ -38,7 +38,7 @@ public abstract class Person
 	public Person(String serviceName, ZkClient zkClient) throws IOException, KeeperException, InterruptedException
 	{
 		this.zkClient = zkClient;
-		serviceDefineInfo = zkClient.queryServiceDefineInfo(serviceName, new DefineWatcher());
+		
 		this.serviceName = serviceName;
 
 	}
@@ -87,7 +87,7 @@ public abstract class Person
 
 	}
 
-	private void choseRoute(ServiceDefineInfo serviceDefineInfo)
+	protected void choseRoute(ServiceDefineInfo serviceDefineInfo)
 	{
 		String route = serviceDefineInfo.getRoutestrage();
 		if (route.equals("random"))
@@ -103,7 +103,7 @@ public abstract class Person
 
 	}
 
-	private void choseFailStrategy(ServiceDefineInfo serviceDefineInfo)
+	protected void choseFailStrategy(ServiceDefineInfo serviceDefineInfo)
 	{
 		String failStrategy = serviceDefineInfo.getFailstrage();
 		if (failStrategy.equals("failfast"))

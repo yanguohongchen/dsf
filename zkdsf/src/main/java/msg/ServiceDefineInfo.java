@@ -119,6 +119,10 @@ public class ServiceDefineInfo
 		this.proxyClass = proxyClass;
 	}
 	
+	@Override
+	public String toString(){
+		return servicename+":"+proxyClass+":"+routestrage;
+	}
 	
 
 }

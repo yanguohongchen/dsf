@@ -38,7 +38,7 @@ public class Subscriber extends Person
 	private static final Logger logger = LoggerFactory.getLogger(Subscriber.class);
 
 	// 此信息由订阅者特有信息
-	private LinkedHashMap<String, ServeiceInstanceInfo> map = new LinkedHashMap<>();
+	private LinkedHashMap<String, ServeiceInstanceInfo> localMap = new LinkedHashMap<>();
 
 	private Map<String, AvroClientPool<Object>> clientPoolMap = new HashMap<>();
 
@@ -47,6 +47,14 @@ public class Subscriber extends Person
 	public Subscriber(String serviceName, ZkClient zkClient) throws IOException, KeeperException, InterruptedException
 	{
 		super(serviceName, zkClient);
+		serviceDefineInfo = zkClient.queryServiceDefineInfo(serviceName, new DefineWatcher());
+		choseRoute(serviceDefineInfo);
+		choseFailStrategy(serviceDefineInfo);
+		if(serviceDefineInfo.getServicename()==null){
+			throw new RuntimeException("服务未定义！请联系相关人员！");
+		}else{
+			logger.debug(serviceDefineInfo.toString());
+		}
 	}
 
 	// 订阅服务
@@ -78,11 +86,14 @@ public class Subscriber extends Person
 	// 如果获取连接失败，根据失败策略作出处理
 	public Object choseClient()
 	{
+		if(localMap.isEmpty()){
+			throw new RuntimeException("服务"+serviceName+"没有实例，请联系相关负责人！");
+		}
 		List<ServeiceInstanceInfo> instances = new ArrayList<ServeiceInstanceInfo>();
-		Set<String> set = map.keySet();
+		Set<String> set = localMap.keySet();
 		for (String string : set)
 		{
-			instances.add(map.get(string));
+			instances.add(localMap.get(string));
 		}
 		// 路由策略
 		ServeiceInstanceInfo serveiceInstanceInfo = routeStrategy.getInstance(instances);
@@ -140,25 +151,25 @@ public class Subscriber extends Person
 	{
 		try
 		{
-			LinkedHashMap<String, ServeiceInstanceInfo> newmap = zkClient.queryServiceInstanceInfos(serviceName, watcher);
-			for (String newkey : newmap.keySet())
+			LinkedHashMap<String, ServeiceInstanceInfo> remoteMap = zkClient.queryServiceInstanceInfos(serviceName, watcher);
+			for (String newkey : remoteMap.keySet())
 			{
-				if (!map.containsKey(newkey))// 新增的服务端
+				if (!localMap.containsKey(newkey))// 新增的服务端
 				{
 					logger.debug("新增的实例：" + newkey);
-					createClientPool(newmap.get(newkey));
+					createClientPool(remoteMap.get(newkey));
 				}
 			}
-			for (String newkey : map.keySet())
+			for (String newkey : localMap.keySet())
 			{
-				if (!newmap.containsKey(newkey))// 已下线的服务端
+				if (!remoteMap.containsKey(newkey))// 已下线的服务端
 				{
 					logger.debug("下线的实例：" + newkey);
 					destoryClientPool(newkey);
 				}
 			}
 			// 更新本地服务列表
-			map = newmap;
+			localMap = remoteMap;
 		} catch (KeeperException e)
 		{
 			logger.error(serviceName + " not exist!", e);

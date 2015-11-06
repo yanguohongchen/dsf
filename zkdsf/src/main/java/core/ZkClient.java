@@ -192,8 +192,8 @@ public class ZkClient {
 		Stat stat = new Stat();
 		serviceName = "/" + serviceName;
 		byte[] data = zk.getData(serviceName, watcher, stat);
-		ServiceDefineInfo serviceDefineInfo = gson.fromJson(new String(data), ServiceDefineInfo.class);
-		return serviceDefineInfo;
+		PublishMsg publishMsg = gson.fromJson(new String(data), PublishMsg.class);
+		return publishMsg.getServiceDefineInfo();
 	}
 
 }
